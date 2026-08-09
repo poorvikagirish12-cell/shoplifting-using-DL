@@ -1,0 +1,23 @@
+paths:
+  root: "." # change to "/content/drive/MyDrive/shoplifting-detection" when running in Colab
+  checkpoints: "outputs/checkpoints"
+  logs: "outputs/logs"
+  results: "outputs/results"
+
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  splits_dir: "data/splits"
+  clip_length: 16
+  frame_size: 224
+
+model:
+  type: "cnn_lstm"     # options: cnn_lstm, i3d, mil
+  backbone: "resnet50"
+  hidden_size: 256
+  num_classes: 2
+
+training:
+  batch_size: 8
+  epochs: 30
+  lr: 0.0001
