@@ -90,8 +90,15 @@ def main():
     print("Building model...")
     model = build_model(config).to(device)
     
-    # Loss and Optimizer
-    criterion = nn.CrossEntropyLoss()
+    # Calculate class weights dynamically to handle the severe data imbalance
+    train_df = pd.read_csv(train_csv, header=None, names=['path', 'label'])
+    class_counts = train_df['label'].value_counts().sort_index()
+    total_samples = len(train_df)
+    weights = [total_samples / (2.0 * count) for count in class_counts]
+    class_weights = torch.tensor(weights, dtype=torch.float).to(device)
+    
+    # Loss and Optimizer with class weights
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     # Only train parameters that require gradients (LSTM + FC)
     optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=config['training']['lr'])
     
