@@ -99,8 +99,23 @@ def main():
     
     # Loss and Optimizer with class weights
     criterion = nn.CrossEntropyLoss(weight=class_weights)
-    # Only train parameters that require gradients (LSTM + FC)
-    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=config['training']['lr'])
+    
+    # Discriminative learning rate: 10x smaller for the CNN backbone than for the LSTM/Classifier
+    base_lr = config['training']['lr']
+    cnn_params = []
+    head_params = []
+    
+    for name, param in model.named_parameters():
+        if param.requires_grad:
+            if 'cnn' in name:
+                cnn_params.append(param)
+            else:
+                head_params.append(param)
+                
+    optimizer = optim.Adam([
+        {"params": cnn_params, "lr": base_lr * 0.1},
+        {"params": head_params, "lr": base_lr}
+    ])
     
     epochs = config['training']['epochs']
     best_val_loss = float('inf')

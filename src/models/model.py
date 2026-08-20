@@ -20,9 +20,15 @@ class CNNLSTM(nn.Module):
         else:
             raise ValueError(f"Unsupported backbone: {backbone_name}")
             
-        # Freeze CNN weights initially to save memory/compute
+        # Freeze CNN weights initially to save memory/compute and avoid overfitting
         for param in self.cnn.parameters():
             param.requires_grad = False
+            
+        # Unfreeze only the last block (layer4) of ResNet50 where task-specific features live
+        # layer4 is at index 7 in the sequential children list of ResNet50
+        if len(self.cnn) > 7:
+            for param in self.cnn[7].parameters():
+                param.requires_grad = True
             
         # LSTM for temporal modeling
         self.lstm = nn.LSTM(
