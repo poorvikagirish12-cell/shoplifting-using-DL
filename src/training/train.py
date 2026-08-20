@@ -91,7 +91,7 @@ def main():
     model = build_model(config).to(device)
     
     # Calculate class weights dynamically to handle the severe data imbalance
-    train_df = pd.read_csv(train_csv, header=None, names=['path', 'label'])
+    train_df = pd.read_csv(train_csv)
     class_counts = train_df['label'].value_counts().sort_index()
     total_samples = len(train_df)
     weights = [total_samples / (2.0 * count) for count in class_counts]
